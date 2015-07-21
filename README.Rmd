@@ -1,0 +1,145 @@
+---
+title: "Getting and Cleaning Data Course Project"
+output:
+  html_document:
+    keep_md: true
+---
+
+This Jeremy Sellars' course project described here: https://class.coursera.org/getdata-030
+
+Creates a tidy dataset from data from "Human Activity Recognition Using Smartphones"
+with mean sensor values per participant subject in each of 6 activities.
+These activities and sensors are described here:
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+
+### Citation
+> Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
+
+
+### Note
+This assumes that "getdata-projectfiles-UCI HAR Dataset.zip" 
+is extracted to the current working directory - so its README.txt
+is in the working directory.
+
+
+```{r load_and_preprocess, echo=FALSE}
+suppressWarnings({
+  library("knitr")
+})
+
+opts_chunk$set(echo=TRUE)
+```
+
+## Project source/explanation
+
+The `load_dataset` function takes files from a data set (train or test)
+* `load_dataset("train")` uses
+  * \subject_train.txt
+  * \X_train.txt
+  * \y_train.txt
+* `load_dataset("test")` uses:
+  * \subject_test.txt
+  * \X_test.txt
+  * \y_test.txt
+
+The `combine_datasets` function uses `rbind` to form a single result set by stacking the test and train datasets with `rbind`.
+
+This resultset is then aggregated to form the final product
+
+* **A row for each subject-activity pair**
+* **A column for every feature (measurement)** - The mean of each feature, grouped by subject (person), and activity.
+
+
+The 5 objectives from the assignment description are clearly marked in the source code, for example: `###### REQUIREMENT #2 - fulfilled ###### `.
+
+```{r combined_datasets.mean}
+get_file_name <- function(set_name, file) paste(set_name, "/", file, "_", set_name, ".txt", sep = "")
+
+# Read activity names from file
+activity_names <- read.csv("activity_labels.txt", header=F, sep=" ", stringsAsFactors=F)[,2]
+get_activity_name <- function(activity_index) activity_names[activity_index]
+
+# Read feature names from file
+feature_names <- read.csv("features.txt", header=F, sep=" ", stringsAsFactors=F)[,2]
+# Get feature names containing "std()" or "mean()", sorted alphabetically
+mean_and_std_feature_names <-
+  sort(feature_names[c(grep("std\\(\\)", feature_names, ignore.case = F),
+                       grep("mean\\(\\)", feature_names, ignore.case = F))])
+
+## Loads and transforms a dataset (set_name should be "train" or "test")
+load_dataset <- function(set_name){
+  # Read the feature (measurement) file
+  all_features <- read.csv(get_file_name(set_name, "X"), sep="", header = F)
+  # Read the subject (measurement) file
+  subject <- read.csv(get_file_name(set_name, "subject"), header = F)
+  # Name the feature columns re: Requirement #4
+  names(all_features) <- feature_names
+  
+  ###### REQUIREMENT #2 - fulfilled ###### 
+  # 2. Extracts only the measurements on the mean and standard deviation for each measurement
+  #    There are a bunch of columns we don't care about.  The next statement includes
+  #    only the features whose names contain "std()" or "mean()"
+  features <- all_features[,mean_and_std_feature_names]
+
+  ###### REQUIREMENT #3 - fulfilled ###### 
+  # 3. Uses descriptive activity names to name the activities in the data set
+  #    Instead of listing an activity number like 1 or 2, it lists "WALKING" or "WALKING_UPSTAIRS"
+  y <- sapply(read.csv(get_file_name(set_name, "y"), header = F), get_activity_name)
+  dataset <- cbind(subject, features, y)
+
+  ###### REQUIREMENT #4 - fulfilled ###### 
+  # 4. Appropriately labels the data set with descriptive variable names.
+  #    The "feature" (measurement) columns are already named with names from "features.txt".
+  #    The following line names the subject and activity columns.
+  names(dataset)[c(1,ncol(dataset))] <- c("subject", "activity")
+  
+  dataset
+}
+
+combine_datasets <- function(){
+  ###### REQUIREMENT #1 - fulfilled ###### 
+  # 1. Merges the training and the test sets to create one data set.
+  #    The next expression essentially stacks the "test" dataset on top of the "train" dataset.
+  rbind(load_dataset("test"),
+        load_dataset("train"))
+}
+
+combined_datasets <- combine_datasets()
+
+###### REQUIREMENT #5 - fulfilled ###### 
+# 5. From the data set in step 4, creates a second, independent tidy data set
+#    with the average of each variable for each activity and each subject.
+# The following code aggregates the previously created dataset by taking the mean
+# of the data grouped by subject and activity.
+combined_datasets.mean <- aggregate(. ~ subject + activity, data = combined_datasets, mean)
+names(combined_datasets.mean) <- Map(function(n)paste("mean", n, sep = "_"), names(combined_datasets.mean))
+names(combined_datasets.mean)[1:2] <- c("subject", "activity")
+
+```
+
+You can reproduce my "means.txt" file with the following R code:
+
+`write.table(combined_datasets.mean, "means.txt", row.names=FALSE, sep="\t")`
+
+
+## Reading the output
+
+The means.txt file may be read with this code:
+
+`means <- read.table("means.txt", header=TRUE)`
+
+**Note: This file is in wide-form (see project rubric).**
+
+* There is a column for every feature (measurement) containing either "std()" or "mean()", per class instructions.  It seems that which features qualified was a matter of debate.  For this project, I chose a smaller set of features that are clearly valuable.  I accept that my reviewers may have formed their own opinions on the subject, and I hope they will give me the benefit of the doubt.  The selection of features is easily changed (search for `grep`).
+* There is a row for each subject-activity pair
+
+## CodeBook
+The resultant data is described in the [CodeBook](CodeBook.md).
+
+## Comparing with my results
+
+Note: In the interest of keeping people honest, I haven't included the data in the repository.  It was submitted as an attachment to the Coursera course.
+
+```{r summary}
+summary(combined_datasets.mean)
+```
