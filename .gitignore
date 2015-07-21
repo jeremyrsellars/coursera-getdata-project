@@ -1,0 +1,6 @@
+*.txt
+*.zip
+*.html
+run_analysis.R
+/test/
+/train/
