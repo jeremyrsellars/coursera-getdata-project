@@ -1,0 +1,63 @@
+---
+title: "CodeBook"
+output:
+  html_document:
+    keep_md: true
+---
+
+A tidy dataset from data from "Human Activity Recognition Using Smartphones"
+with mean sensor values per participant subject in each of 6 activities.
+
+The document describes the mapping between this tidy dataset and the source data from which it was generated.
+
+These activities and sensors are described here:
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+
+### Citation
+> Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
+
+
+```{r load_and_preprocess, echo=FALSE}
+### Note
+# This assumes that "getdata-projectfiles-UCI HAR Dataset.zip" 
+# is extracted to the current working directory - so its README.txt
+# is in the working directory.
+
+suppressWarnings({
+  library("knitr")
+})
+
+opts_chunk$set(echo=TRUE)
+```
+
+## Identification
+
+The resultant dataset has a row for each subject-activity pair.  The subject is an [individual test participant](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones), and an activity is one of (`WALKING`, `WALKING_UPSTAIRS`, `WALKING_DOWNSTAIRS`, `SITTING`, `STANDING`, `LAYING`).
+
+> The experiments have been carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, we captured 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz. The experiments have been video-recorded to label the data manually. The obtained dataset has been randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data. 
+
+From the [dataset summary](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones).
+
+## Features (Measurements)
+
+There is a column for every feature (measurement) - The mean of each feature, grouped by subject (person), and activity.
+
+The original features are described [here](README.txt) (copied from the study [source files](http://archive.ics.uci.edu/ml/machine-learning-databases/00240/) for your convenience).
+
+```{r combined_datasets.mean}
+# Read feature names from file
+feature_names <- read.csv("features.txt", header=F, sep=" ", stringsAsFactors=F)[,2]
+# Get feature names containing "std()" or "mean()", sorted alphabetically
+mean_and_std_feature_names <-
+  sort(feature_names[c(grep("std\\(\\)", feature_names, ignore.case = F),
+                       grep("mean\\(\\)", feature_names, ignore.case = F))])
+
+original_feature <- mean_and_std_feature_names
+
+tidy_feature <- Map(function(n)paste("mean", n, sep = "_"), original_feature)
+
+feature_comparison <- as.data.frame(cbind(original_feature, tidy_feature), row.names = FALSE)
+kable(feature_comparison)
+```
+
+The tidy feature is the "mean" of the original feature partitioned by participant and activity.

@@ -1,6 +1,6 @@
 # Getting and Cleaning Data Course Project
 
-This Jeremy Sellars' course project described here: https://class.coursera.org/getdata-030
+This is Jeremy Sellars' course project (described here: https://class.coursera.org/getdata-030).
 
 Creates a tidy dataset from data from "Human Activity Recognition Using Smartphones"
 with mean sensor values per participant subject in each of 6 activities.
