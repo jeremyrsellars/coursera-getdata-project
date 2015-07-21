@@ -13,10 +13,6 @@ The document describes the mapping between this tidy dataset and the source data
 These activities and sensors are described here:
 http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 
-### Citation
-> Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
-
-
 ```{r load_and_preprocess, echo=FALSE}
 ### Note
 # This assumes that "getdata-projectfiles-UCI HAR Dataset.zip" 
@@ -27,7 +23,7 @@ suppressWarnings({
   library("knitr")
 })
 
-opts_chunk$set(echo=TRUE)
+opts_chunk$set(echo=F)
 ```
 
 ## Identification
@@ -38,11 +34,35 @@ The resultant dataset has a row for each subject-activity pair.  The subject is 
 
 From the [dataset summary](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones).
 
+## Sample
+Sometimes a picture is worth a 1000 words.  Here are a few rows and columns.
+
+```{R sample}
+column_names <- unlist(as.list(read.table("means.txt", header = FALSE, nrows = 1)[1,]))
+means <- read.table("means.txt", header = TRUE)
+colnames(means) <- column_names
+
+column_range <- 1:4
+kable(means[c(1,33,66,99), column_range],
+      format = "markdown",
+      padding = 2,
+      row.names = F,
+      col.names = column_names[column_range])
+```
+
+
 ## Features (Measurements)
 
 There is a column for every feature (measurement) - The mean of each feature, grouped by subject (person), and activity.
 
 The original features are described [here](README.txt) (copied from the study [source files](http://archive.ics.uci.edu/ml/machine-learning-databases/00240/) for your convenience).
+
+The tidy feature is the "mean" of the original feature partitioned by participant and activity.
+
+### tl;dr
+In the tidy dataset, the feature name is the original name prefixed with "mean_" to remind you it has been averaged.
+
+### Features
 
 ```{r combined_datasets.mean}
 # Read feature names from file
@@ -57,7 +77,9 @@ original_feature <- mean_and_std_feature_names
 tidy_feature <- Map(function(n)paste("mean", n, sep = "_"), original_feature)
 
 feature_comparison <- as.data.frame(cbind(original_feature, tidy_feature), row.names = FALSE)
-kable(feature_comparison, format = "markdown", padding = 2)
+kable(feature_comparison, format = "markdown", padding = 2, col.names = c("Original Feature", "Tidy Feature"))
 ```
 
-The tidy feature is the "mean" of the original feature partitioned by participant and activity.
+## Citation
+> Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
+

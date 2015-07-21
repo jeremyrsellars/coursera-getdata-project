@@ -8,10 +8,6 @@ The document describes the mapping between this tidy dataset and the source data
 These activities and sensors are described here:
 http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 
-### Citation
-> Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
-
-
 
 
 ## Identification
@@ -22,32 +18,33 @@ The resultant dataset has a row for each subject-activity pair.  The subject is 
 
 From the [dataset summary](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones).
 
+## Sample
+Sometimes a picture is worth a 1000 words.  Here are a few rows and columns.
+
+
+|  subject|activity  |  mean_fBodyAcc-mean()-X|  mean_fBodyAcc-mean()-Y|
+|--------:|:---------|-----------------------:|-----------------------:|
+|        1|LAYING    |              -0.9390991|              -0.8670652|
+|        3|SITTING   |              -0.9701544|              -0.8919078|
+|        6|STANDING  |              -0.9771003|              -0.9303365|
+|        9|WALKING   |              -0.2947112|              -0.2576776|
+
+
 ## Features (Measurements)
 
 There is a column for every feature (measurement) - The mean of each feature, grouped by subject (person), and activity.
 
 The original features are described [here](README.txt) (copied from the study [source files](http://archive.ics.uci.edu/ml/machine-learning-databases/00240/) for your convenience).
 
+The tidy feature is the "mean" of the original feature partitioned by participant and activity.
 
-```r
-# Read feature names from file
-feature_names <- read.csv("features.txt", header=F, sep=" ", stringsAsFactors=F)[,2]
-# Get feature names containing "std()" or "mean()", sorted alphabetically
-mean_and_std_feature_names <-
-  sort(feature_names[c(grep("std\\(\\)", feature_names, ignore.case = F),
-                       grep("mean\\(\\)", feature_names, ignore.case = F))])
+### tl;dr
+In the tidy dataset, the feature name is the original name prefixed with "mean_" to remind you it has been averaged.
 
-original_feature <- mean_and_std_feature_names
-
-tidy_feature <- Map(function(n)paste("mean", n, sep = "_"), original_feature)
-
-feature_comparison <- as.data.frame(cbind(original_feature, tidy_feature), row.names = FALSE)
-kable(feature_comparison, format = "markdown", padding = 2)
-```
+### Features
 
 
-
-|original_feature             |tidy_feature                      |
+|Original Feature             |Tidy Feature                      |
 |:----------------------------|:---------------------------------|
 |fBodyAcc-mean()-X            |mean_fBodyAcc-mean()-X            |
 |fBodyAcc-mean()-Y            |mean_fBodyAcc-mean()-Y            |
@@ -116,4 +113,6 @@ kable(feature_comparison, format = "markdown", padding = 2)
 |tGravityAccMag-mean()        |mean_tGravityAccMag-mean()        |
 |tGravityAccMag-std()         |mean_tGravityAccMag-std()         |
 
-The tidy feature is the "mean" of the original feature partitioned by participant and activity.
+## Citation
+> Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
+
