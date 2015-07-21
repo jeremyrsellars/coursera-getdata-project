@@ -57,7 +57,7 @@ original_feature <- mean_and_std_feature_names
 tidy_feature <- Map(function(n)paste("mean", n, sep = "_"), original_feature)
 
 feature_comparison <- as.data.frame(cbind(original_feature, tidy_feature), row.names = FALSE)
-kable(feature_comparison)
+kable(feature_comparison, format = "markdown", padding = 2)
 ```
 
 The tidy feature is the "mean" of the original feature partitioned by participant and activity.
